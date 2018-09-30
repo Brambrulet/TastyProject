@@ -5,7 +5,7 @@ install: true
 dist: trusty
 
 jdk:
-- OpenJDK8
+- openjdk8
 
 os:
 - windows
