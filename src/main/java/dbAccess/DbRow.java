@@ -9,12 +9,10 @@ public interface DbRow {
      * @param item
      * @return
      */
-    public static DbRow newItem(DbRow item);
-
-    /**
-     *
-     */
-    public void Operation1();
+    public static DbRow newItem(DbRow item, DbRowType dbRowType) {
+        // TODO implement here
+        return null;
+    }
 
     /**
      * return value of Id field

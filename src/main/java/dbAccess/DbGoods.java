@@ -9,6 +9,7 @@ public class DbGoods extends AbstractDbRow {
      * Default constructor
      */
     public DbGoods() {
+        super(DbRowType.DBTYPE_GOODS);
     }
 
 }

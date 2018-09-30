@@ -5,7 +5,7 @@ package dbAccess;
  *
  * @author Сказка
  */
-public class DbRowFieldInfo {
+public class DbFieldInfo {
 
     /**
      *
@@ -34,8 +34,20 @@ public class DbRowFieldInfo {
 
     /**
      * Default constructor
+     * @param dbName
+     * @param type
+     * @param size
+     * @param linkType
+     * @param linkIndex
+     * @param isKey
      */
-    public DbRowFieldInfo() {
+    public DbFieldInfo(String dbName, int type, int size, Class linkType, int linkIndex, boolean isKey) {
+        this.dbName = dbName;
+        this.type = type;
+        this.size = size;
+        this.linkType = linkType;
+        this.linkIndex = linkIndex;
+        this.isKey = isKey;
     }
 
 

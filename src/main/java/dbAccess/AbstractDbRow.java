@@ -3,7 +3,7 @@ package dbAccess;
 /**
  * @author Сказка
  */
-public abstract class AbstractDbRow implements DbRow {
+public class AbstractDbRow implements DbRow {
 
     /**
      *
@@ -20,12 +20,16 @@ public abstract class AbstractDbRow implements DbRow {
     /**
      *
      */
-    public boolean modified = false;
+    boolean modified = false;
+
 
     /**
-     * Default constructor
+     * @param rowType
      */
-    public AbstractDbRow() {
+    AbstractDbRow(DbRowType rowType) {
+        this.rowType = rowType;
+        fields = new Object[rowType.fieldsInfo.length];
+        links = new DbRow[rowType.linksQty];
     }
 
     /**
@@ -38,27 +42,16 @@ public abstract class AbstractDbRow implements DbRow {
     }
 
     /**
-     * @param rowType
-     */
-    void AbstractDbRow(int rowType) {
-        // TODO implement here
-    }
-
-    /**
-     *
-     */
-    public void Operation1() {
-        // TODO implement here
-    }
-
-    /**
      * return value of Id field
      *
      * @return Id of row in database
      */
     public DbKey getKey() {
-        // TODO implement here
-        return null;
+        Object[][] key = new Object[rowType.keyFields.length][];
+        for (int iField : rowType.keyFields) {
+            key[iField] = new Object[]{rowType.fieldsInfo[iField].dbName, fields[iField]};
+        }
+        return new DbKeyImpl(key);
     }
 
     /**
