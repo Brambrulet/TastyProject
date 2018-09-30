@@ -1,0 +1,7 @@
+/.git
+/.gradle
+/gradle
+/out
+/.idea
+gradlew.*
+settings.gradle
