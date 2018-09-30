@@ -1,8 +1,5 @@
-/.git
 /.gradle
+/.idea
 /gradle
 /out
-/.idea
 gradlew.*
-settings.gradle
-
