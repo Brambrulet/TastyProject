@@ -5,7 +5,7 @@ install: true
 dist: trusty
 
 jdk:
-- openjdk8
+- oraclejdk8
 
 os:
 - windows
@@ -24,7 +24,7 @@ cache:
   - $HOME/.gradle/wrapper/
 
 before_install:
-- chmod +x gradlew
+#- chmod +x gradlew
 
 #addons:
 #  sonarcloud:
@@ -33,8 +33,10 @@ before_install:
 #      secure: $SONARCLOUD_TOKEN
 
 script:
-- ./gradlew assemble
-- ./gradlew check
+- gradle assemble
+- gradle check
+#- ./gradlew assemble
+#- ./gradlew check
 #  - sonar-scanner
 #  - rm -rf .scannerwork
 
