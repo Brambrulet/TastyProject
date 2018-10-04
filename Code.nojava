@@ -1,0 +1,2 @@
+import java.lang.invoke.MethodHandles;
+    private static final Logger LOGGER = Logger.getLogger(MethodHandles.lookup().lookupClass());

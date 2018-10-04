@@ -5,11 +5,10 @@ install: true
 dist: trusty
 
 jdk:
-#- oraclejdk8
-- openjdk8
+- oraclejdk8
 
 os:
-- windows
+- linux
 
 branches:
   only:
@@ -34,8 +33,6 @@ before_install:
 #      secure: $SONARCLOUD_TOKEN
 
 script:
-#- gradle assemble
-#- gradle check
 - ./gradlew assemble
 - ./gradlew check
 #  - sonar-scanner
