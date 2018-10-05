@@ -7,6 +7,7 @@ public interface DaoTreeNode {
 
     PojoTreeNode[] getAll(String sql);
 
+    PojoTreeNode[] getRoot(String sql);
     PojoTreeNode[] getChildren(String sql, Integer id);
 
     PojoTreeNode add(String sql, int makerId, Object... params);
@@ -15,7 +16,7 @@ public interface DaoTreeNode {
 
     boolean update(String sql, int makerId, PojoTreeNode treeNode);
 
-    PojoTreeNode update(String sql, int makerId, Object... params);
+    boolean update(String sql, int makerId, Object... params);
 
     boolean del(String sql, int id);
 }

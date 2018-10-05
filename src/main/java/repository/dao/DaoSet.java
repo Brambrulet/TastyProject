@@ -13,7 +13,7 @@ public interface DaoSet {
 
     boolean update(int makerId, PojoSet set);
 
-    PojoSet update(int makerId, Object... params);
+    boolean update(int makerId, Object... params);
 
     boolean del(int id);
 }

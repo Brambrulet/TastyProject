@@ -1,2 +1,100 @@
 import java.lang.invoke.MethodHandles;
+
     private static final Logger LOGGER = Logger.getLogger(MethodHandles.lookup().lookupClass());
+
+    private static Object newPonjoObject(Class clazz, Object[] fields) {
+        try {
+            return clazz.getDeclaredConstructor(fields.getClass()).newInstance(new Object[]{fields});
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            LOGGER.trace(Consts.CATCH_EXCEPTION, e);
+        }
+        return null;
+    }
+
+
+    private static <R> R[] internalPojoLine(IntFunction<R[]> arrayMaker, int size){
+        return arrayMaker.apply(size);
+    }
+
+    private static <R> R[] internalPojoLine(Class<R> clazz, int size){
+        return (R[])java.lang.reflect.Array.newInstance(clazz, size);
+    }
+
+
+    //не удобно получается - куча try catch ... сплошные крокодилы
+    private static <R> R internalExecuteQuery(String sql, Function<ResultSet, R> executor, Object... params) throws SQLException {
+        try (Connection connection = connectionManager.getConnection();
+             Statement statement = internalMakeStatement(connection, params);
+             PreparedStatement preparedStatement = internalMakePreparedStatement(connection, sql, params);
+             ResultSet resultSet = intarnalMakeResultSet(statement, preparedStatement, sql)) {
+            return executor.apply(resultSet);
+        } catch (SQLException e) {
+            LOGGER.trace(Consts.CATCH_EXCEPTION, e);
+            throw e;
+        }
+    }
+
+
+    protected static Object fetchOneRowAsPojo(Class clazz, String sql, Object... params) {
+        Object[] fields = fetchOneRowAsObjArray(sql, params);
+        return fields.length == 0 ? null : internalNewPojoObjectByReflection(clazz, fields);
+    }
+
+
+    protected static Object[] fetchRowsAsPojoArray(Class clazz, String sql, Object... params) {
+        Queue<Object[]> fields = fetchRowsAsQueueOfObjArray(sql, params);
+        Object[] result = new Object[fields.size()];
+
+        for (int iUser = 0; !fields.isEmpty(); iUser++) {
+            result[iUser] = internalNewPojoObjectByReflection(clazz, fields.poll());
+        }
+
+        return result;
+    }
+
+
+    private static Object internalNewPojoObjectByReflection(Class clazz, Object[] fields) {
+        try {
+            return clazz.getDeclaredConstructor(fields.getClass()).newInstance(new Object[]{fields});
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            LOGGER.trace(Consts.CATCH_EXCEPTION, e);
+        }
+        return null;
+    }
+
+
+    private static Queue<Object[]> fetchRowsAsQueueOfObjArray(String sql, Object... params) {
+        try (Connection connection = connectionManager.getConnection();
+             Statement statement = internalMakeStatement(connection, params);
+             PreparedStatement preparedStatement = internalMakePreparedStatement(connection, sql, params);
+             ResultSet resultSet = internalMakeResultSet(statement, preparedStatement, sql)) {
+            int colsQty = resultSet == null ? 0 : resultSet.getMetaData().getColumnCount();
+            Queue<Object[]> result = new LinkedList<>();
+
+            if (colsQty > 0) {
+                while (resultSet.next()) {
+                    result.add(internalObjArrayFromResultSet(resultSet, new Object[colsQty]));
+                }
+            }
+            return result;
+        } catch (SQLException e) {
+            LOGGER.trace(Consts.CATCH_EXCEPTION, e);
+        }
+        return new LinkedList<>();
+    }
+
+    protected static <R> R[] fetchRowsAsPojoArray(Function<Object[], R> pojoMaker,
+                                                  IntFunction<R[]> pojoArrayMaker,
+                                                  String sql,
+                                                  Object... params) {
+        Queue<Object[]> fields = fetchRowsAsQueueOfObjArray(sql, params);
+        R[] result = pojoArrayMaker.apply(fields.size());
+
+        for (int iRow = 0; !fields.isEmpty(); iRow++) {
+            result[iRow] = pojoMaker.apply(fields.poll());
+        }
+
+        return result;
+    }
+
+

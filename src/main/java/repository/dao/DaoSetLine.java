@@ -3,9 +3,9 @@ package repository.dao;
 import pojo.PojoSetLine;
 
 public interface DaoSetLine {
-    PojoSetLine get(Integer id);
+    PojoSetLine get(int id);
 
-    PojoSetLine[] getAll();
+    PojoSetLine[] getByVersion(int versionId);
 
     PojoSetLine add(int makerId, Object... params);
 
@@ -13,7 +13,7 @@ public interface DaoSetLine {
 
     boolean update(int makerId, PojoSetLine setLine);
 
-    PojoSetLine update(int makerId, Object... params);
+    boolean update(int makerId, Object... params);
 
     boolean del(int id);
 }

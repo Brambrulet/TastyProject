@@ -1,87 +1,71 @@
 package repository.dao;
 
 import pojo.PojoUser;
-import repository.dao.background.DaoBgSupport;
+import repository.dao.background.DaoBackground;
 
-import java.util.Arrays;
-
-public class DaoUserImpl implements DaoUser {
+public class DaoUserImpl extends DaoBackground implements DaoUser {
     @Override
     public PojoUser getByLogin(String login) {
-        return (PojoUser) DaoBgSupport.fetchOneRowAsPonjo(PojoUser.class, DaoBgSupport.SQL_USER_SELECT_BY_LOGIN, login);
+        return fetchOneRowAsPojo(PojoUser::new, SQL_USER_SELECT_BY_LOGIN, login);
     }
 
     @Override
     public PojoUser get(Integer id) {
-        return (PojoUser) DaoBgSupport.fetchOneRowAsPonjo(PojoUser.class, DaoBgSupport.SQL_USER_SELECT_BY_ID, id);
+        return fetchOneRowAsPojo(PojoUser::new, SQL_USER_SELECT_BY_ID, id);
     }
 
     @Override
     public PojoUser[] getAll() {
-        return Arrays.stream(DaoBgSupport.getRowsAsPonjoArray(PojoUser.class, DaoBgSupport.SQL_USER_SELECT_ALL)).map(object -> (PojoUser) object).toArray(PojoUser[]::new);
+        return fetchRowsAsPojoArray(PojoUser::new, PojoUser[]::new, SQL_USER_SELECT_ALL);
     }
 
-    //Не обновляется время изменения в Pojo
-    //но в данный момент это реализовывать не актуально
-    //Параметры должны идти без id
-    //ибо он сам генерится в базе
     @Override
     public PojoUser add(int makerId, Object... params) {
-        if (makerId > 0 && params.length == 3 &&
-                params[0] != null &&
-                params[1] != null &&
-                params[2] != null) {
-            return (PojoUser) DaoBgSupport.fetchOneRowAsPonjo(PojoUser.class, DaoBgSupport.SQL_USER_INSERT, params[0], params[1], params[2], makerId);
-        }
-        return null;
+        return makerId > 0 && params.length == 3 &&
+                params[0] != null &&  //login
+                params[1] != null &&  //md5Passw
+                params[2] != null ?   //nick
+                fetchOneRowAsPojo(PojoUser::new, SQL_USER_INSERT, params[0], params[1], params[2], makerId) :
+                null;
     }
 
     @Override
     public boolean add(int makerId, PojoUser user) {
-        if (makerId > 0 && user != null &&
+        return makerId > 0 && user != null &&
                 user.getLogin() != null &&
                 user.getMd5Passw() != null &&
-                user.getNick() != null) {
-            Object[] fields = DaoBgSupport.executeQueryGetOneRow(DaoBgSupport.SQL_USER_INSERT, user.getLogin(), user.getMd5Passw(), user.getNick(), makerId);
-            user.init(fields);
-            return fields != null;
-        }
-        return false;
+                user.getNick() != null &&
+                fetchOneRowAsPojoObject(user::init, SQL_USER_INSERT, user.getLogin(), user.getMd5Passw(), user.getNick(), makerId);
     }
 
     @Override
     public boolean del(int id) {
         //удалять можно почти всех :)
-        return id > 2 && DaoBgSupport.execute(DaoBgSupport.SQL_USER_DELETE, id);
+        return id > 2 && execute(SQL_USER_DELETE, id);
     }
 
     //Не обновляется время изменения в Pojo
     //но в данный момент это реализовывать не актуально
     @Override
-    public boolean update(int makerId, PojoUser user) {
-        if (makerId > 0 && user != null &&
+    public boolean update(int editorId, PojoUser user) {
+        return editorId > 0 && user != null &&
                 user.getId() != null &&
                 user.getLogin() != null &&
                 user.getMd5Passw() != null &&
-                user.getNick() != null) {
-            return DaoBgSupport.execute(DaoBgSupport.SQL_USER_UPDATE, user.getLogin(), user.getMd5Passw(), user.getNick(), makerId, user.getId());
-        }
-        return false;
+                user.getNick() != null &&
+                execute(SQL_USER_UPDATE, user.getLogin(), user.getMd5Passw(), user.getNick(), editorId, user.getId());
     }
 
-    //Этот метод крайне похож на add,
+    //Этот метод по полям крайне похож на add,
     //но здесь массив данных должен начинаться
     //с поля id. Это важно!
     @Override
-    public PojoUser update(int makerId, Object... params) {
-        if (makerId > 0 && params.length == 4 &&
-                params[0] != null &&
-                params[1] != null &&
-                params[2] != null &&
-                params[3] != null) {
-            return DaoBgSupport.execute(DaoBgSupport.SQL_USER_UPDATE, params[1], params[2], params[3], makerId, params[0]) ?
-                    get((Integer) params[0]) : null;
-        }
-        return null;
+    public boolean update(int editorId, Object... params) {
+        return editorId > 0 && params.length == 4 &&
+                params[0] != null && //id
+                params[1] != null && //login
+                params[2] != null && //md5Passw
+                params[3] != null && //nick
+                execute(SQL_USER_UPDATE, params[1], params[2], params[3], editorId, params[0]);
     }
 }

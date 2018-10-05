@@ -5,7 +5,7 @@ import pojo.PojoSetVersion;
 public interface DaoSetVersion {
     PojoSetVersion get(Integer id);
 
-    PojoSetVersion[] getAll();
+    PojoSetVersion[] getListBySetId(int setId);
 
     PojoSetVersion add(int makerId, Object... params);
 
@@ -13,7 +13,7 @@ public interface DaoSetVersion {
 
     boolean update(int makerId, PojoSetVersion setVersion);
 
-    PojoSetVersion update(int makerId, Object... params);
+    boolean update(int makerId, Object... params);
 
     boolean del(int id);
 }

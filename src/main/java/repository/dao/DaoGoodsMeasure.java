@@ -5,7 +5,7 @@ import pojo.PojoGoodsMeasure;
 public interface DaoGoodsMeasure {
     PojoGoodsMeasure get(int goodsId, int measureId);
 
-    PojoGoodsMeasure[] getAll();
+    PojoGoodsMeasure[] getAllForGoods(int goodsId);
 
     PojoGoodsMeasure add(int makerId, Object... params);
 
@@ -13,7 +13,7 @@ public interface DaoGoodsMeasure {
 
     boolean update(int makerId, PojoGoodsMeasure goodsMeasure);
 
-    PojoGoodsMeasure update(int makerId, Object... params);
+    boolean update(int makerId, Object... params);
 
     boolean del(int goodsId, int measureId);
 }

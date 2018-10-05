@@ -13,7 +13,7 @@ public interface DaoMeasure {
 
     boolean update(int makerId, PojoMeasure measure);
 
-    PojoMeasure update(int makerId, Object... params);
+    boolean update(int makerId, Object... params);
 
     boolean del(int id);
 }

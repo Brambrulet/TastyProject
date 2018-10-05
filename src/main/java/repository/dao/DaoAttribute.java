@@ -13,7 +13,7 @@ public interface DaoAttribute {
 
     boolean update(int makerId, PojoAttribute attribute);
 
-    PojoAttribute update(int makerId, Object... params);
+    boolean update(int makerId, Object... params);
 
     boolean del(int id);
 }

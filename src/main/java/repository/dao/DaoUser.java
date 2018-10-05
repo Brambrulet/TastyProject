@@ -15,7 +15,7 @@ public interface DaoUser {
 
     boolean update(int makerId, PojoUser user);
 
-    PojoUser update(int makerId, Object... params);
+    boolean update(int makerId, Object... params);
 
     boolean del(int id);
 }
