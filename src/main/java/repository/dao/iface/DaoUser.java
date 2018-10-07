@@ -1,6 +1,6 @@
-package repository.dao;
+package repository.dao.iface;
 
-import pojo.PojoUser;
+import repository.pojo.PojoUser;
 
 public interface DaoUser {
     PojoUser getByLogin(String login);

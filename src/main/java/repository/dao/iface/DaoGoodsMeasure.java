@@ -1,6 +1,6 @@
-package repository.dao;
+package repository.dao.iface;
 
-import pojo.PojoGoodsMeasure;
+import repository.pojo.PojoGoodsMeasure;
 
 public interface DaoGoodsMeasure {
     PojoGoodsMeasure get(int goodsId, int measureId);

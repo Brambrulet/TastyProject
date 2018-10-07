@@ -1,6 +1,6 @@
 package repository.dao.background;
 
-import consts.Consts;
+import utils.consts.Consts;
 import org.apache.log4j.Logger;
 import repository.connection_manager.ConnectionManager;
 import repository.connection_manager.ConnectionManagerJdbcImpl;
@@ -8,6 +8,17 @@ import repository.connection_manager.ConnectionManagerJdbcImpl;
 import java.io.Closeable;
 import java.sql.*;
 
+/**
+ * декор. Скрывает работу с классами
+ * Connection, Statement и PreparedStatement,
+ * делает конструкции try...catch
+ * при доступе к базе менее громоздкими.
+ *
+ * Суть простая - в зависимости от наличия параметров
+ * (для параметризованных запросов) используется либо
+ * Statement, либо PreparedStatement.
+ *
+ */
 public class DaoStatement implements Closeable {
     private static final Logger LOGGER = Logger.getLogger(DaoStatement.class);
     private static final ConnectionManager connectionManager = ConnectionManagerJdbcImpl.getInstance();
@@ -16,6 +27,16 @@ public class DaoStatement implements Closeable {
     private final PreparedStatement preparedStatement;
     private final String sql;
 
+    /**
+     * Получаем sql-запрос и параметры - params.
+     * На основании это решаем, что использовать
+     * Statement, либо PreparedStatement.
+     *
+     *
+     * @param sql
+     * @param params
+     * @throws SQLException
+     */
     DaoStatement(String sql, Object... params) throws SQLException {
         connection = connectionManager.getConnection();
         this.sql = sql;

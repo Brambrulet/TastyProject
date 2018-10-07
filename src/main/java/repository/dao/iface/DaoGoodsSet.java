@@ -1,6 +1,6 @@
-package repository.dao;
+package repository.dao.iface;
 
-import pojo.PojoGoodsSet;
+import repository.pojo.PojoGoodsSet;
 
 public interface DaoGoodsSet {
     PojoGoodsSet get(int goodsId, int setId);

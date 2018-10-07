@@ -1,17 +1,23 @@
 package repository.dao;
 
-import pojo.PojoGoodsSet;
+import repository.pojo.PojoGoodsSet;
 import repository.dao.background.DaoBackground;
+import repository.dao.iface.DaoGoodsSet;
 
-public class DaoGoodsSetImpl extends DaoBackground implements DaoGoodsSet {
+public class DaoGoodsSetImpl extends DaoBackground<PojoGoodsSet> implements DaoGoodsSet {
+    public DaoGoodsSetImpl() {
+        super(PojoGoodsSet::new,
+                PojoGoodsSet[]::new,
+                PojoGoodsSet::init);
+    }
     @Override
     public PojoGoodsSet get(int goodsId, int setId) {
-        return fetchOneRowAsPojo(PojoGoodsSet::new, SQL_GOODS_SET_SELECT_BY_IDS, goodsId, setId);
+        return fetchOneRowAsPojoObject(SQL_GOODS_SET_SELECT_BY_IDS, goodsId, setId);
     }
 
     @Override
     public PojoGoodsSet[] getAllForGoods(int goodsId) {
-        return fetchRowsAsPojoArray(PojoGoodsSet::new, PojoGoodsSet[]::new, SQL_GOODS_SET_SELECT_ALL_FOR_GOODS);
+        return fetchRowsAsPojoArray(SQL_GOODS_SET_SELECT_ALL_FOR_GOODS);
     }
 
     @Override
@@ -21,7 +27,7 @@ public class DaoGoodsSetImpl extends DaoBackground implements DaoGoodsSet {
                 params[1] != null &&  //set_id
                 params[2] != null &&  //measure_id
                 params[3] != null ?   //k
-                fetchOneRowAsPojo(PojoGoodsSet::new, SQL_GOODS_SET_INSERT, params[0], params[1], params[2], params[3], makerId) :
+                fetchOneRowAsPojoObject(SQL_GOODS_SET_INSERT, params[0], params[1], params[2], params[3], makerId) :
                 null;
     }
 
@@ -32,7 +38,7 @@ public class DaoGoodsSetImpl extends DaoBackground implements DaoGoodsSet {
                 goodsSet.getSetId() != null &&
                 goodsSet.getMeasureId() != null &&
                 goodsSet.getK() != null &&
-                fetchOneRowAsPojoObject(goodsSet::init, SQL_GOODS_SET_INSERT, goodsSet.getGoodsId(), goodsSet.getSetId(), goodsSet.getMeasureId(), goodsSet.getK(), makerId);
+                fetchOneRowAsPojoObject(goodsSet, SQL_GOODS_SET_INSERT, goodsSet.getGoodsId(), goodsSet.getSetId(), goodsSet.getMeasureId(), goodsSet.getK(), makerId);
     }
 
     @Override

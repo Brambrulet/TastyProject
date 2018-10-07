@@ -1,6 +1,6 @@
-package repository.dao;
+package repository.dao.iface;
 
-import pojo.PojoSetVersion;
+import repository.pojo.PojoSetVersion;
 
 public interface DaoSetVersion {
     PojoSetVersion get(Integer id);

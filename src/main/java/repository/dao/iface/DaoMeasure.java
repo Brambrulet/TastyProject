@@ -1,6 +1,6 @@
-package repository.dao;
+package repository.dao.iface;
 
-import pojo.PojoMeasure;
+import repository.pojo.PojoMeasure;
 
 public interface DaoMeasure {
     PojoMeasure get(Integer id);

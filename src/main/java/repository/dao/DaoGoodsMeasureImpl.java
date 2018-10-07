@@ -1,17 +1,24 @@
 package repository.dao;
 
-import pojo.PojoGoodsMeasure;
+import repository.pojo.PojoGoodsMeasure;
 import repository.dao.background.DaoBackground;
+import repository.dao.iface.DaoGoodsMeasure;
 
-public class DaoGoodsMeasureImpl extends DaoBackground implements DaoGoodsMeasure {
+public class DaoGoodsMeasureImpl extends DaoBackground<PojoGoodsMeasure> implements DaoGoodsMeasure {
+    public DaoGoodsMeasureImpl() {
+        super(PojoGoodsMeasure::new,
+                PojoGoodsMeasure[]::new,
+                PojoGoodsMeasure::init);
+    }
+
     @Override
     public PojoGoodsMeasure get(int goodsId, int measureId) {
-        return fetchOneRowAsPojo(PojoGoodsMeasure::new, SQL_GOODS_MEASURE_SELECT_BY_IDS, goodsId, measureId);
+        return fetchOneRowAsPojoObject(SQL_GOODS_MEASURE_SELECT_BY_IDS, goodsId, measureId);
     }
 
     @Override
     public PojoGoodsMeasure[] getAllForGoods(int goodsId) {
-        return fetchRowsAsPojoArray(PojoGoodsMeasure::new, PojoGoodsMeasure[]::new, SQL_GOODS_MEASURE_SELECT_ALL_FOR_GOODS);
+        return fetchRowsAsPojoArray(SQL_GOODS_MEASURE_SELECT_ALL_FOR_GOODS);
     }
 
     @Override
@@ -21,7 +28,7 @@ public class DaoGoodsMeasureImpl extends DaoBackground implements DaoGoodsMeasur
                 params[1] != null &&  //measure_id
                 params[2] != null &&  //is_primary
                 params[3] != null ?   //k
-                fetchOneRowAsPojo(PojoGoodsMeasure::new, SQL_GOODS_MEASURE_INSERT, params[0], params[1], params[2], params[3], makerId) :
+                fetchOneRowAsPojoObject(SQL_GOODS_MEASURE_INSERT, params[0], params[1], params[2], params[3], makerId) :
                 null;
     }
 

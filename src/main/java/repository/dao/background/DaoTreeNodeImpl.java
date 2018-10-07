@@ -1,26 +1,33 @@
 package repository.dao.background;
 
-import pojo.PojoTreeNode;
+import repository.dao.iface.DaoTreeNode;
+import repository.pojo.PojoTreeNode;
 
-public class DaoTreeNodeImpl extends DaoBackground implements DaoTreeNode {
+public class DaoTreeNodeImpl extends DaoBackground<PojoTreeNode> implements DaoTreeNode {
+    protected DaoTreeNodeImpl() {
+        super(PojoTreeNode::new,
+                PojoTreeNode[]::new,
+                PojoTreeNode::init);
+    }
+
     @Override
     public PojoTreeNode get(String sql, Integer id) {
-        return fetchOneRowAsPojo(PojoTreeNode::new, sql, id);
+        return fetchOneRowAsPojoObject(sql, id);
     }
 
     @Override
     public PojoTreeNode[] getAll(String sql) {
-        return fetchRowsAsPojoArray(PojoTreeNode::new, PojoTreeNode[]::new, sql);
+        return fetchRowsAsPojoArray(sql);
     }
 
     @Override
     public PojoTreeNode[] getRoot(String sql) {
-        return fetchRowsAsPojoArray(PojoTreeNode::new, PojoTreeNode[]::new, sql);
+        return fetchRowsAsPojoArray(sql);
     }
 
     @Override
     public PojoTreeNode[] getChildren(String sql, Integer id) {
-        return fetchRowsAsPojoArray(PojoTreeNode::new, PojoTreeNode[]::new, sql, id);
+        return fetchRowsAsPojoArray(sql, id);
     }
 
     @Override
@@ -29,7 +36,7 @@ public class DaoTreeNodeImpl extends DaoBackground implements DaoTreeNode {
                 params[0] != null &&  //parent_id
                 params[1] != null &&  //name
                 params[2] != null ?   //note_type
-                fetchOneRowAsPojo(PojoTreeNode::new, sql, params[0], params[1], params[2], makerId) :
+                fetchOneRowAsPojoObject(sql, params[0], params[1], params[2], makerId) :
                 null;
     }
 
@@ -39,7 +46,7 @@ public class DaoTreeNodeImpl extends DaoBackground implements DaoTreeNode {
                 treeNode.getParentId() != null &&
                 treeNode.getName() != null &&
                 treeNode.getNodeType() != null &&
-                fetchOneRowAsPojoObject(treeNode::init, sql, treeNode.getParentId(), treeNode.getName(), treeNode.getNodeType(), makerId);
+                fetchOneRowAsPojoObject(treeNode, sql, treeNode.getParentId(), treeNode.getName(), treeNode.getNodeType(), makerId);
     }
 
     @Override

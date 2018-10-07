@@ -1,18 +1,38 @@
 package repository.dao.background;
 
-import consts.Consts;
 import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.IntFunction;
+import java.util.function.*;
 
-public class DaoBackground {
+import static utils.consts.Consts.*;
+
+
+/**
+ * Утильный класс. Берёт на себя большую часть работы с запросами.
+ *
+ * Все методы имеют парметр params: Object... params
+ * Если хотя бы одно значение передано, то будет использован PreparedStatement,
+ * и все значения params будут переданы в запрос.
+ *
+ * Если параметров передано не было, то используется Statement
+ *
+ * Класс DaoBackground является дженериком,
+ * и специализироваться должен типом объекта Pojo.
+ *
+ * Конструктор принимает три параметра - все функциональные интерфейсы.
+ * Function<Object[], T> pojoMaker - создатель объектов Pojo
+ * IntFunction<T[]> pojoArrayMaker - создатель массива объектов Pojo
+ * BiConsumer<T, Object[]> pojoPusher - пушер объектов Pojo
+ */
+public class DaoBackground<T> {
     private static final Logger LOGGER = Logger.getLogger(DaoBackground.class);
+    private final Function<Object[], T> pojoMaker;
+    private final IntFunction<T[]> pojoArrayMaker;
+    private final BiConsumer<T, Object[]> pojoPusher;
 
     private static final String SQL_ID = "id";
     private static final String SQL_NAME = "name";
@@ -64,7 +84,6 @@ public class DaoBackground {
     private static final String SQL_TEMPLATE_UPDATE_7 = "update %s set %s=?, %s=?, %s=?, %s=?, %s=?, %s=?, %s=?, editor_id=? where id = ?";
     private static final String SQL_TEMPLATE_UPDATE_4 = "update %s set %s=?, %s=?, %s=?, %s=?, editor_id=? where id = ?";
 
-
     private static final String SQL_MEASURE = "measure";
     private static final String SQL_MEASURE_MOD_FIELDS = String.format(SQL_TEMPLATE_4_FIELDS, SQL_NAME, SQL_KIND, SQL_IS_PRIMARY, SQL_BASE_K);
     private static final String SQL_MEASURE_ALL_FIELDS = String.format(SQL_TEMPLATE_3_FIELDS, SQL_ID, SQL_MEASURE_MOD_FIELDS, SQL_STD_TAIL_FIELDS);
@@ -92,7 +111,6 @@ public class DaoBackground {
     protected static final String SQL_ATTRIBUTE_DELETE = String.format(SQL_TEMPLATE_DELETE, SQL_ATTRIBUTE);
     protected static final String SQL_ATTRIBUTE_SELECT_BY_ID = String.format(SQL_TEMPLATE_SELECT_WHERE, SQL_ATTRIBUTE_ALL_FIELDS, SQL_ATTRIBUTE, SQL_ID);
     protected static final String SQL_ATTRIBUTE_SELECT_ALL = String.format(SQL_TEMPLATE_SELECT, SQL_ATTRIBUTE_ALL_FIELDS, SQL_ATTRIBUTE);
-
     protected static final String SQL_ATTRIBUTE_UPDATE = String.format(SQL_TEMPLATE_UPDATE_2, SQL_ATTRIBUTE, SQL_NAME, SQL_VALUE);
     protected static final String SQL_ATTRIBUTE_INSERT = String.format(SQL_TEMPLATE_INSERT_2, SQL_ATTRIBUTE, SQL_ATTRIBUTE_MOD_FIELDS, SQL_ATTRIBUTE_ALL_FIELDS);
 
@@ -116,7 +134,7 @@ public class DaoBackground {
 
     private static final String SQL_SET_LINE = "set_line";
     private static final String SQL_SET_LINE_MOD_FIELDS = SQL_VERSION_ID + ", " + SQL_GOODS_ID + ", " + SQL_SET_ID + ", " + SQL_PARAMS + ", " + SQL_VALUE1 + ", " + SQL_VALUE2 + ", " + SQL_VALUE3;
-    protected static final String SQL_SET_LINE_ALL_FIELDS = SQL_ID + ", " + SQL_SET_LINE_MOD_FIELDS + ", " + SQL_STD_TAIL_FIELDS;
+    private static final String SQL_SET_LINE_ALL_FIELDS = SQL_ID + ", " + SQL_SET_LINE_MOD_FIELDS + ", " + SQL_STD_TAIL_FIELDS;
     protected static final String SQL_SET_LINE_UPDATE = String.format(SQL_TEMPLATE_UPDATE_7, SQL_SET_LINE, SQL_VERSION_ID, SQL_GOODS_ID, SQL_SET_ID, SQL_PARAMS, SQL_VALUE1, SQL_VALUE2, SQL_VALUE3);
     protected static final String SQL_SET_LINE_DELETE = String.format(SQL_TEMPLATE_DELETE, SQL_SET_LINE);
     protected static final String SQL_SET_LINE_SELECT_BY_ID = String.format(SQL_TEMPLATE_SELECT_WHERE, SQL_SET_LINE_ALL_FIELDS, SQL_SET_LINE, SQL_ID);
@@ -170,58 +188,163 @@ public class DaoBackground {
     protected static final String SQL_GOODS_SET_SELECT_ALL_FOR_GOODS = String.format(SQL_TEMPLATE_SELECT_WHERE, SQL_GOODS_SET_ALL_FIELDS, SQL_GOODS_SET, SQL_GOODS_ID);
     protected static final String SQL_GOODS_SET_INSERT = String.format(SQL_TEMPLATE_INSERT_4, SQL_GOODS_SET, SQL_GOODS_ID + ", " + SQL_SET_ID + ", " + SQL_GOODS_SET_MOD_FIELDS, SQL_GOODS_SET_ALL_FIELDS);
 
-    protected DaoBackground() {
+    /**
+     * Конструктор принимает три параметра - все функциональные интерфейсы.
+     * Function<Object[], T> pojoMaker - создатель объектов Pojo
+     * IntFunction<T[]> pojoArrayMaker - создатель массива объектов Pojo
+     * BiConsumer<T, Object[]> pojoPusher - пушер объектов Pojo
+     *
+     *
+     * @param pojoMaker
+     * @param pojoArrayMaker
+     * @param pojoPusher
+     */
+    protected DaoBackground(Function<Object[], T> pojoMaker,
+                            IntFunction<T[]> pojoArrayMaker,
+                            BiConsumer<T, Object[]> pojoPusher
+    ) {
+        this.pojoMaker = pojoMaker;
+        this.pojoArrayMaker = pojoArrayMaker;
+        this.pojoPusher = pojoPusher;
     }
 
-    private static Object[] internalObjArrayFromResultSet(ResultSet source,
-                                                          Object[] dest) throws SQLException {
-        for (int iColumn = 0; iColumn < dest.length; ++iColumn) {
-            dest[iColumn] = source.getObject(iColumn + 1);
+    /**
+     * Пробегает по столбцам в source (результат SQL запроса)
+     * и возвращает массив значений (Object[])
+     *
+     * @param source
+     * @return
+     * @throws SQLException
+     */
+    private static Object[] internalObjArrayFromResultSet(ResultSet source) throws SQLException {
+        Object[] result = new Object[source.getMetaData().getColumnCount()];
+
+        for (int iColumn = 0; iColumn < result.length; ++iColumn) {
+            result[iColumn] = source.getObject(iColumn + 1);
         }
 
-        return dest;
+        return result;
     }
 
-    protected static boolean execute(String sql,
-                                     Object... params) {
+    /**
+     * Исполняет запрос sql.
+     * Возвращает true, если всё ок.
+     *
+     * Метод имеет парметр params: Object... params
+     * Если хотя бы одно значение передано, то будет использован PreparedStatement,
+     * и все значения params будут переданы в запрос.
+     *
+     * Если параметров передано не было, то используется Statement
+     *
+     * @param sql
+     * @param params
+     * @return
+     */
+    protected static boolean execute(String sql, Object... params) {
         try (DaoStatement statement = new DaoStatement(sql, params)) {
+
             return statement.execute();
         } catch (SQLException e) {
-            LOGGER.trace(Consts.CATCH_EXCEPTION, e);
+            LOGGER.trace(CATCH_EXCEPTION, e);
         }
         return false;
     }
 
-    protected static Object fetchOneFieldAsObject(String sql,
-                                                  Object... params) {
+    /**
+     * Исполняет запрос sql,
+     * возвращает первое значение в первой строке
+     * результатов запроса (ResultSet resultSet).
+     * Остальные результаты запроса игнорируются.
+     *
+     * Если запрос ничего не вернул, или выполнен с ошибкой
+     * данный метод вернёт null.
+     *
+     * Метод имеет парметр params: Object... params
+     * Если хотя бы одно значение передано, то будет использован PreparedStatement,
+     * и все значения params будут переданы в запрос.
+     *
+     * Если параметров передано не было, то используется Statement
+     *
+     * @param sql
+     * @param params
+     * @return
+     */
+    protected static Object fetchOneFieldAsObject(String sql, Object... params) {
         try (DaoStatement statement = new DaoStatement(sql, params);
              ResultSet resultSet = statement.executeQuery()) {
-            return resultSet != null && resultSet.next() && resultSet.getMetaData().getColumnCount() > 0 ?
-                    resultSet.getObject(1) :
-                    null;
+
+            if(resultSet != null && resultSet.next() && resultSet.getMetaData().getColumnCount() > 0){
+                return resultSet.getObject(1);
+            }else{
+                return null;
+            }
         } catch (SQLException e) {
-            LOGGER.trace(Consts.CATCH_EXCEPTION, e);
+            LOGGER.trace(CATCH_EXCEPTION, e);
         }
         return null;
     }
 
-    protected static Object[] fetchOneRowAsObjArray(String sql,
-                                                    Object... params) {
+    /**
+     * Исполняет запрос sql,
+     * возвращает все значения из первой строки
+     * результатов запроса (ResultSet resultSet)
+     * в виде массива (Object[]).
+     * Остальные результаты запроса игнорируются.
+     *
+     * Если запрос ничего не вернул, или выполнен с ошибкой
+     * данный метод вернёт массив нулевой длины (new Object[0]).
+     *
+     * Метод имеет парметр params: Object... params
+     * Если хотя бы одно значение передано, то будет использован PreparedStatement,
+     * и все значения params будут переданы в запрос.
+     *
+     * Если параметров передано не было, то используется Statement
+     *
+     * @param sql
+     * @param params
+     * @return
+     */
+    protected static Object[] fetchOneRowAsObjArray(String sql, Object... params) {
         try (DaoStatement statement = new DaoStatement(sql, params);
              ResultSet resultSet = statement.executeQuery()) {
-            return resultSet != null && resultSet.next() ?
-                    internalObjArrayFromResultSet(resultSet, new Object[resultSet.getMetaData().getColumnCount()]) :
-                    new Object[0];
+
+            if(resultSet != null && resultSet.next()){
+                return internalObjArrayFromResultSet(resultSet);
+            }else{
+                return new Object[0];
+            }
         } catch (SQLException e) {
-            LOGGER.trace(Consts.CATCH_EXCEPTION, e);
+            LOGGER.trace(CATCH_EXCEPTION, e);
         }
         return new Object[0];
     }
 
-    protected static boolean fetchOneRowAsPojoObject(Consumer<Object[]> pusher,
-                                                     String sql,
-                                                     Object... params) {
+    /**
+     * Исполняет запрос sql,
+     * все значения из первой строки
+     * результатов запроса (ResultSet resultSet)
+     * передаёт пушеру (pusher - функциональный интерфейс)
+     * в виде массива (Object[]).
+     * Остальные результаты запроса игнорируются.
+     * Возвращает true.
+     *
+     * Если запрос ничего не вернул, или выполнен с ошибкой
+     * данный метод вернёт false.
+     *
+     * Метод имеет парметр params: Object... params
+     * Если хотя бы одно значение передано, то будет использован PreparedStatement,
+     * и все значения params будут переданы в запрос.
+     *
+     * Если параметров передано не было, то используется Statement
+     *
+     * @param pusher
+     * @param sql
+     * @param params
+     * @return
+     */
+    protected static boolean fetchOneRowAsPojoObject(Consumer<Object[]> pusher, String sql, Object... params) {
         Object[] fields = fetchOneRowAsObjArray(sql, params);
+
         if (fields.length == 0) {
             return false;
         } else {
@@ -230,32 +353,96 @@ public class DaoBackground {
         }
     }
 
-    protected static <R> R[] fetchRowsAsPojoArray(Function<Object[], R> pojoMaker,
-                                                  IntFunction<R[]> pojoArrayMaker,
-                                                  String sql,
-                                                  Object... params) {
-        try (DaoStatement statement = new DaoStatement(sql, params);
-             ResultSet resultSet = statement.executeQuery()) {
-            int colsQty = resultSet == null ? 0 : resultSet.getMetaData().getColumnCount();
-            List<R> pojoList = new ArrayList<>();
+    /**
+     * Исполняет запрос sql,
+     * все значения из первой строки
+     * результатов запроса (ResultSet resultSet)
+     * пушером (pojoPusher - функциональный интерфейс, задаётся в конструкторе)
+     * загоняются в объект destPojo (передаётся в функцию в параметрах).
+     * Остальные результаты запроса игнорируются.
+     * Возвращает true.
+     *
+     * Если запрос ничего не вернул, или выполнен с ошибкой
+     * данный метод вернёт false.
+     *
+     * Метод имеет парметр params: Object... params
+     * Если хотя бы одно значение передано, то будет использован PreparedStatement,
+     * и все значения params будут переданы в запрос.
+     *
+     * Если параметров передано не было, то используется Statement
+     *
+     * @param destPojo
+     * @param sql
+     * @param params
+     * @return
+     */
+    protected boolean fetchOneRowAsPojoObject(T destPojo, String sql, Object... params) {
+        Object[] fields = fetchOneRowAsObjArray(sql, params);
 
-            if (colsQty > 0) {
-                while (resultSet.next()) {
-                    pojoList.add(pojoMaker.apply(internalObjArrayFromResultSet(resultSet, new Object[colsQty])));
-                }
-            }
-
-            return pojoList.toArray(pojoArrayMaker.apply(pojoList.size()));
-        } catch (SQLException e) {
-            LOGGER.trace(Consts.CATCH_EXCEPTION, e);
+        if (fields.length == 0) {
+            return false;
+        } else {
+            pojoPusher.accept(destPojo, fields);
+            return true;
         }
-        return pojoArrayMaker.apply(0);
     }
 
-    protected static <R> R fetchOneRowAsPojo(Function<Object[], R> pojoMaker,
-                                             String sql,
-                                             Object... params) {
+    /**
+     * Исполняет запрос sql,
+     * все значения из первой строки
+     * передаются в конструктов объекта Pojo,
+     * Остальные результаты запроса игнорируются.
+     * Возвращает true.
+     *
+     * Если запрос ничего не вернул, или выполнен с ошибкой
+     * данный метод вернёт null.
+     *
+     * Метод имеет парметр params: Object... params
+     * Если хотя бы одно значение передано, то будет использован PreparedStatement,
+     * и все значения params будут переданы в запрос.
+     *
+     * Если параметров передано не было, то используется Statement
+     * @param sql
+     * @param params
+     * @return
+     */
+    protected T fetchOneRowAsPojoObject(String sql, Object... params) {
         Object[] fields = fetchOneRowAsObjArray(sql, params);
         return fields.length == 0 ? null : pojoMaker.apply(fields);
+    }
+
+    /**
+     * Исполняет запрос sql,
+     * все значения из первой строки
+     * передаются в конструктор объекта Pojo,
+     * Остальные результаты запроса игнорируются.
+     * Возвращает true.
+     *
+     * Если запрос ничего не вернул, или выполнен с ошибкой
+     * данный метод вернёт null.
+     *
+     * @param sql
+     * @param params
+     * @return
+     */
+    protected T[] fetchRowsAsPojoArray(String sql, Object... params) {
+        try (DaoStatement statement = new DaoStatement(sql, params);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            if(resultSet != null){
+                List<T> pojoList = new ArrayList<>();
+
+                while (resultSet.next()) {
+                    pojoList.add(pojoMaker.apply(internalObjArrayFromResultSet(resultSet)));
+                }
+
+                return pojoList.toArray(pojoArrayMaker.apply(pojoList.size()));
+            }else{
+                return pojoArrayMaker.apply(0);
+            }
+        } catch (SQLException e) {
+            LOGGER.trace(CATCH_EXCEPTION, e);
+        }
+        return pojoArrayMaker.apply(0);
     }
 }

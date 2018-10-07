@@ -1,6 +1,6 @@
-package repository.dao;
+package repository.dao.iface;
 
-import pojo.PojoAttribute;
+import repository.pojo.PojoAttribute;
 
 public interface DaoAttribute {
     PojoAttribute get(Integer id);

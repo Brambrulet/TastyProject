@@ -1,4 +1,6 @@
-package pojo;
+package repository.pojo;
+
+import utils.errors.InvalidNumberOfArgumentsException;
 
 import java.sql.Timestamp;
 
@@ -13,11 +15,7 @@ public class PojoMeasure {
     private Timestamp makeDate;
     private Timestamp editDate;
 
-    public PojoMeasure(Integer id, String name, Byte kind, Boolean primary, Double baseK, Integer makerId, Integer editorId, Timestamp makeDate, Timestamp editDate) {
-        init(id, name, kind, primary, baseK, makerId, editorId, makeDate, editDate);
-    }
-
-    public PojoMeasure(Object[] fields) {
+    public PojoMeasure(Object... fields) {
         init(fields);
     }
 
@@ -96,29 +94,17 @@ public class PojoMeasure {
         this.editDate = editDate;
     }
 
-    public void init(Integer id, String name, Byte kind, Boolean primary, Double baseK, Integer makerId, Integer editorId, Timestamp makeDate, Timestamp editDate) {
-        this.id = id;
-        this.name = name;
-        this.kind = kind;
-        this.primary = primary;
-        this.baseK = baseK;
-        this.makerId = makerId;
-        this.editorId = editorId;
-        this.makeDate = makeDate;
-        this.editDate = editDate;
-    }
+    public void init(Object... fields) {
+        if (fields == null || fields.length != 9) throw new InvalidNumberOfArgumentsException();
 
-    public void init(Object[] fields) {
-        boolean isNull = fields == null;
-
-        this.id = isNull ? null : (Integer) fields[0];
-        this.name = isNull ? null : (String) fields[1];
-        this.kind = isNull ? null : (Byte) fields[2];
-        this.primary = isNull ? null : (Boolean) fields[3];
-        this.baseK = isNull ? null : (Double) fields[4];
-        this.makerId = isNull ? null : (Integer) fields[5];
-        this.editorId = isNull ? null : (Integer) fields[6];
-        this.makeDate = isNull ? null : (Timestamp) fields[7];
-        this.editDate = isNull ? null : (Timestamp) fields[8];
+        this.id = (Integer) fields[0];
+        this.name = (String) fields[1];
+        this.kind = (Byte) fields[2];
+        this.primary = (Boolean) fields[3];
+        this.baseK = (Double) fields[4];
+        this.makerId = (Integer) fields[5];
+        this.editorId = (Integer) fields[6];
+        this.makeDate = (Timestamp) fields[7];
+        this.editDate = (Timestamp) fields[8];
     }
 }

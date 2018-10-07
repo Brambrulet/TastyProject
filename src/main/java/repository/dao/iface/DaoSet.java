@@ -1,6 +1,6 @@
-package repository.dao;
+package repository.dao.iface;
 
-import pojo.PojoSet;
+import repository.pojo.PojoSet;
 
 public interface DaoSet {
     PojoSet get(Integer id);

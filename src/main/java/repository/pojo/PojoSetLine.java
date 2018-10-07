@@ -1,4 +1,6 @@
-package pojo;
+package repository.pojo;
+
+import utils.errors.InvalidNumberOfArgumentsException;
 
 import java.sql.Timestamp;
 
@@ -16,15 +18,11 @@ public class PojoSetLine {
     private Timestamp makeDate;
     private Timestamp editDate;
 
-    public PojoSetLine(Object[] fields) {
+    public PojoSetLine(Object... fields) {
         init(fields);
     }
 
     public PojoSetLine() {
-    }
-
-    public PojoSetLine(Integer id, Integer versionId, Integer goodsId, Integer setId, Integer params, Double value1, Double value2, Double value3, Integer makerId, Integer editorId, Timestamp makeDate, Timestamp editDate) {
-        init(id, versionId, goodsId, setId, params, value1, value2, value3, makerId, editorId, makeDate, editDate);
     }
 
     public Integer getId() {
@@ -123,35 +121,20 @@ public class PojoSetLine {
         this.editDate = editDate;
     }
 
-    public void init(Integer id, Integer versionId, Integer goodsId, Integer setId, Integer params, Double value1, Double value2, Double value3, Integer makerId, Integer editorId, Timestamp makeDate, Timestamp editDate) {
-        this.id = id;
-        this.versionId = versionId;
-        this.goodsId = goodsId;
-        this.setId = setId;
-        this.params = params;
-        this.value1 = value1;
-        this.value2 = value2;
-        this.value3 = value3;
-        this.makerId = makerId;
-        this.editorId = editorId;
-        this.makeDate = makeDate;
-        this.editDate = editDate;
-    }
+    public void init(Object... fields) {
+        if (fields == null || fields.length != 12) throw new InvalidNumberOfArgumentsException();
 
-    public void init(Object[] fields) {
-        boolean isNull = fields == null;
-
-        this.id = isNull ? null : (Integer) fields[0];
-        this.versionId = isNull ? null : (Integer) fields[1];
-        this.goodsId = isNull ? null : (Integer) fields[2];
-        this.setId = isNull ? null : (Integer) fields[3];
-        this.params = isNull ? null : (Integer) fields[4];
-        this.value1 = isNull ? null : (Double) fields[5];
-        this.value2 = isNull ? null : (Double) fields[6];
-        this.value3 = isNull ? null : (Double) fields[7];
-        this.makerId = isNull ? null : (Integer) fields[8];
-        this.editorId = isNull ? null : (Integer) fields[9];
-        this.makeDate = isNull ? null : (Timestamp) fields[10];
-        this.editDate = isNull ? null : (Timestamp) fields[11];
+        this.id = (Integer) fields[0];
+        this.versionId = (Integer) fields[1];
+        this.goodsId = (Integer) fields[2];
+        this.setId = (Integer) fields[3];
+        this.params = (Integer) fields[4];
+        this.value1 = (Double) fields[5];
+        this.value2 = (Double) fields[6];
+        this.value3 = (Double) fields[7];
+        this.makerId = (Integer) fields[8];
+        this.editorId = (Integer) fields[9];
+        this.makeDate = (Timestamp) fields[10];
+        this.editDate = (Timestamp) fields[11];
     }
 }

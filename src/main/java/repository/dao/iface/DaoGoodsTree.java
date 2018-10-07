@@ -1,8 +1,8 @@
-package repository.dao;
+package repository.dao.iface;
 
-import pojo.PojoTreeNode;
+import repository.pojo.PojoTreeNode;
 
-public interface DaoSetTree {
+public interface DaoGoodsTree {
     PojoTreeNode get(Integer id);
 
     PojoTreeNode[] getAll();
@@ -15,9 +15,9 @@ public interface DaoSetTree {
 
     boolean add(int makerId, PojoTreeNode attribute);
 
-    boolean update(int makerId, PojoTreeNode attribute);
+    boolean update(int editorId, PojoTreeNode attribute);
 
-    boolean update(int makerId, Object... params);
+    boolean update(int editorId, Object... params);
 
     boolean del(int id);
 }

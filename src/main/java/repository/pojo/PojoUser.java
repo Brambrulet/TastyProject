@@ -1,4 +1,6 @@
-package pojo;
+package repository.pojo;
+
+import utils.errors.InvalidNumberOfArgumentsException;
 
 import java.sql.Timestamp;
 
@@ -12,11 +14,7 @@ public class PojoUser {
     private Timestamp makeDate;
     private Timestamp editDate;
 
-    public PojoUser(Integer id, String login, String md5Passw, String nick, Integer makerId, Integer editorId, Timestamp makeDate, Timestamp editDate) {
-        init(id, login, md5Passw, nick, makerId, editorId, makeDate, editDate);
-    }
-
-    public PojoUser(Object[] fields) {
+    public PojoUser(Object... fields) {
         init(fields);
     }
 
@@ -87,28 +85,17 @@ public class PojoUser {
         this.editDate = editDate;
     }
 
-    public void init(Integer id, String login, String md5Passw, String nick, Integer makerId, Integer editorId, Timestamp makeDate, Timestamp editDate) {
-        this.id = id;
-        this.login = login;
-        this.md5Passw = md5Passw;
-        this.nick = nick;
-        this.makerId = makerId;
-        this.editorId = editorId;
-        this.makeDate = makeDate;
-        this.editDate = editDate;
-    }
+    public void init(Object... fields) {
+        if (fields == null || fields.length != 8) throw new InvalidNumberOfArgumentsException();
 
-    public void init(Object[] fields) {
-        boolean isNull = fields == null;
-
-        this.id = isNull ? null : (Integer) fields[0];
-        this.login = isNull ? null : (String) fields[1];
-        this.md5Passw = isNull ? null : (String) fields[2];
-        this.nick = isNull ? null : (String) fields[3];
-        this.makerId = isNull ? null : (Integer) fields[4];
-        this.editorId = isNull ? null : (Integer) fields[5];
-        this.makeDate = isNull ? null : (Timestamp) fields[6];
-        this.editDate = isNull ? null : (Timestamp) fields[7];
+        this.id = (Integer) fields[0];
+        this.login = (String) fields[1];
+        this.md5Passw = (String) fields[2];
+        this.nick = (String) fields[3];
+        this.makerId = (Integer) fields[4];
+        this.editorId = (Integer) fields[5];
+        this.makeDate = (Timestamp) fields[6];
+        this.editDate = (Timestamp) fields[7];
     }
 
     @Override

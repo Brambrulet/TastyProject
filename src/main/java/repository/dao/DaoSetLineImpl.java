@@ -1,17 +1,25 @@
 package repository.dao;
 
-import pojo.PojoSetLine;
+import repository.pojo.PojoSetLine;
 import repository.dao.background.DaoBackground;
+import repository.dao.iface.DaoSetLine;
 
-public class DaoSetLineImpl extends DaoBackground implements DaoSetLine {
+public class DaoSetLineImpl extends DaoBackground<PojoSetLine> implements DaoSetLine {
+
+    public DaoSetLineImpl() {
+        super(PojoSetLine::new,
+                PojoSetLine[]::new,
+                PojoSetLine::init);
+    }
+
     @Override
     public PojoSetLine get(int id) {
-        return fetchOneRowAsPojo(PojoSetLine::new, SQL_SET_LINE_SELECT_BY_ID, id);
+        return fetchOneRowAsPojoObject(SQL_SET_LINE_SELECT_BY_ID, id);
     }
 
     @Override
     public PojoSetLine[] getByVersion(int versionId) {
-        return fetchRowsAsPojoArray(PojoSetLine::new, PojoSetLine[]::new, SQL_SET_LINE_SELECT_BY_VERSION, versionId);
+        return fetchRowsAsPojoArray(SQL_SET_LINE_SELECT_BY_VERSION, versionId);
     }
 
     @Override
@@ -24,8 +32,7 @@ public class DaoSetLineImpl extends DaoBackground implements DaoSetLine {
                 params[4] != null &&  //value1
                 params[5] != null &&  //value2
                 params[6] != null ?   //value3
-                fetchOneRowAsPojo(PojoSetLine::new,
-                        SQL_SET_LINE_INSERT,
+                fetchOneRowAsPojoObject(SQL_SET_LINE_INSERT,
                         params[0],
                         params[1],
                         params[2],

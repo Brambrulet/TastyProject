@@ -1,19 +1,24 @@
 package repository.dao;
 
-import pojo.PojoSetVersion;
+import repository.pojo.PojoSetVersion;
 import repository.dao.background.DaoBackground;
+import repository.dao.iface.DaoSetVersion;
 
-public class DaoSetVersionImpl extends DaoBackground implements DaoSetVersion {
+public class DaoSetVersionImpl extends DaoBackground<PojoSetVersion> implements DaoSetVersion {
+    public DaoSetVersionImpl() {
+        super(PojoSetVersion::new,
+                PojoSetVersion[]::new,
+                PojoSetVersion::init);
+    }
+
     @Override
     public PojoSetVersion get(Integer id) {
-        return fetchOneRowAsPojo(PojoSetVersion::new, SQL_SET_VERSION_SELECT_BY_ID, id);
+        return fetchOneRowAsPojoObject(SQL_SET_VERSION_SELECT_BY_ID, id);
     }
 
     @Override
     public PojoSetVersion[] getListBySetId(int setId) {
-        return fetchRowsAsPojoArray(PojoSetVersion::new,
-                PojoSetVersion[]::new,
-                SQL_SET_VERSION_SELECT_BY_SET_ID, setId);
+        return fetchRowsAsPojoArray(SQL_SET_VERSION_SELECT_BY_SET_ID, setId);
     }
 
     @Override
@@ -22,8 +27,7 @@ public class DaoSetVersionImpl extends DaoBackground implements DaoSetVersion {
                 params[0] != null &&  //set_id
                 params[1] != null &&  //start_date
                 params[2] != null ?   //set_value
-                fetchOneRowAsPojo(PojoSetVersion::new,
-                        SQL_SET_VERSION_INSERT,
+                fetchOneRowAsPojoObject(SQL_SET_VERSION_INSERT,
                         params[0],
                         params[1],
                         params[2],
@@ -37,7 +41,7 @@ public class DaoSetVersionImpl extends DaoBackground implements DaoSetVersion {
                 setVersion.getSetId() != null &&
                 setVersion.getStartDate() != null &&
                 setVersion.getSetValue() != null &&
-                fetchOneRowAsPojoObject(setVersion::init,
+                fetchOneRowAsPojoObject(setVersion,
                         SQL_SET_VERSION_INSERT,
                         setVersion.getSetId(),
                         setVersion.getStartDate(),

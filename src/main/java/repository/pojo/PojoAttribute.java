@@ -1,4 +1,6 @@
-package pojo;
+package repository.pojo;
+
+import utils.errors.InvalidNumberOfArgumentsException;
 
 import java.sql.Timestamp;
 
@@ -11,11 +13,7 @@ public class PojoAttribute {
     private Timestamp makeDate;
     private Timestamp editDate;
 
-    public PojoAttribute(Integer id, String name, String value, Integer makerId, Integer editorId, Timestamp makeDate, Timestamp editDate) {
-        init(id, name, value, makerId, editorId, makeDate, editDate);
-    }
-
-    public PojoAttribute(Object[] fields) {
+    public PojoAttribute(Object... fields) {
         init(fields);
     }
 
@@ -78,25 +76,15 @@ public class PojoAttribute {
         this.editDate = editDate;
     }
 
-    public void init(Integer id, String name, String value, Integer makerId, Integer editorId, Timestamp makeDate, Timestamp editDate) {
-        this.id = id;
-        this.name = name;
-        this.value = value;
-        this.makerId = makerId;
-        this.editorId = editorId;
-        this.makeDate = makeDate;
-        this.editDate = editDate;
-    }
+    public void init(Object... fields) {
+        if (fields == null || fields.length != 7) throw new InvalidNumberOfArgumentsException();
 
-    public void init(Object[] fields) {
-        boolean isNull = fields == null;
-
-        this.id = isNull ? null : (Integer) fields[0];
-        this.name = isNull ? null : (String) fields[1];
-        this.value = isNull ? null : (String) fields[2];
-        this.makerId = isNull ? null : (Integer) fields[3];
-        this.editorId = isNull ? null : (Integer) fields[4];
-        this.makeDate = isNull ? null : (Timestamp) fields[5];
-        this.editDate = isNull ? null : (Timestamp) fields[6];
+        this.id = (Integer) fields[0];
+        this.name = (String) fields[1];
+        this.value = (String) fields[2];
+        this.makerId = (Integer) fields[3];
+        this.editorId = (Integer) fields[4];
+        this.makeDate = (Timestamp) fields[5];
+        this.editDate = (Timestamp) fields[6];
     }
 }

@@ -1,22 +1,30 @@
 package repository.dao;
 
-import pojo.PojoUser;
+import repository.pojo.PojoUser;
 import repository.dao.background.DaoBackground;
+import repository.dao.iface.DaoUser;
 
-public class DaoUserImpl extends DaoBackground implements DaoUser {
+public class DaoUserImpl extends DaoBackground<PojoUser> implements DaoUser {
+
+    public DaoUserImpl() {
+        super(PojoUser::new,
+                PojoUser[]::new,
+                PojoUser::init);
+    }
+
     @Override
     public PojoUser getByLogin(String login) {
-        return fetchOneRowAsPojo(PojoUser::new, SQL_USER_SELECT_BY_LOGIN, login);
+        return fetchOneRowAsPojoObject(SQL_USER_SELECT_BY_LOGIN, login);
     }
 
     @Override
     public PojoUser get(Integer id) {
-        return fetchOneRowAsPojo(PojoUser::new, SQL_USER_SELECT_BY_ID, id);
+        return fetchOneRowAsPojoObject(SQL_USER_SELECT_BY_ID, id);
     }
 
     @Override
     public PojoUser[] getAll() {
-        return fetchRowsAsPojoArray(PojoUser::new, PojoUser[]::new, SQL_USER_SELECT_ALL);
+        return fetchRowsAsPojoArray(SQL_USER_SELECT_ALL);
     }
 
     @Override
@@ -25,7 +33,7 @@ public class DaoUserImpl extends DaoBackground implements DaoUser {
                 params[0] != null &&  //login
                 params[1] != null &&  //md5Passw
                 params[2] != null ?   //nick
-                fetchOneRowAsPojo(PojoUser::new, SQL_USER_INSERT, params[0], params[1], params[2], makerId) :
+                fetchOneRowAsPojoObject(SQL_USER_INSERT, params[0], params[1], params[2], makerId) :
                 null;
     }
 
@@ -35,7 +43,7 @@ public class DaoUserImpl extends DaoBackground implements DaoUser {
                 user.getLogin() != null &&
                 user.getMd5Passw() != null &&
                 user.getNick() != null &&
-                fetchOneRowAsPojoObject(user::init, SQL_USER_INSERT, user.getLogin(), user.getMd5Passw(), user.getNick(), makerId);
+                fetchOneRowAsPojoObject(user, SQL_USER_INSERT, user.getLogin(), user.getMd5Passw(), user.getNick(), makerId);
     }
 
     @Override

@@ -1,18 +1,24 @@
 package repository.dao;
 
-import pojo.PojoMeasure;
 import repository.dao.background.DaoBackground;
+import repository.dao.iface.DaoMeasure;
+import repository.pojo.PojoMeasure;
 
-public class DaoMeasureImpl extends DaoBackground implements DaoMeasure {
+public class DaoMeasureImpl extends DaoBackground<PojoMeasure> implements DaoMeasure {
+    public DaoMeasureImpl() {
+        super(PojoMeasure::new,
+                PojoMeasure[]::new,
+                PojoMeasure::init);
+    }
 
     @Override
     public PojoMeasure get(Integer id) {
-        return fetchOneRowAsPojo(PojoMeasure::new, SQL_MEASURE_SELECT_BY_ID, id);
+        return fetchOneRowAsPojoObject(SQL_MEASURE_SELECT_BY_ID, id);
     }
 
     @Override
     public PojoMeasure[] getAll() {
-        return fetchRowsAsPojoArray(PojoMeasure::new, PojoMeasure[]::new, SQL_MEASURE_SELECT_ALL);
+        return fetchRowsAsPojoArray(SQL_MEASURE_SELECT_ALL);
     }
 
     @Override
@@ -22,7 +28,7 @@ public class DaoMeasureImpl extends DaoBackground implements DaoMeasure {
                 params[1] != null &&
                 params[2] != null &&
                 params[3] != null ?
-                fetchOneRowAsPojo(PojoMeasure::new, SQL_MEASURE_INSERT, params[0], params[1], params[2], params[3], makerId) :
+                fetchOneRowAsPojoObject(SQL_MEASURE_INSERT, params[0], params[1], params[2], params[3], makerId) :
                 null;
     }
 

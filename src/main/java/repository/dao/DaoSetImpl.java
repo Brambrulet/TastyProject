@@ -1,17 +1,24 @@
 package repository.dao;
 
-import pojo.PojoSet;
+import repository.pojo.PojoSet;
 import repository.dao.background.DaoBackground;
+import repository.dao.iface.DaoSet;
 
-public class DaoSetImpl extends DaoBackground implements DaoSet {
+public class DaoSetImpl extends DaoBackground<PojoSet> implements DaoSet {
+    public DaoSetImpl() {
+        super(PojoSet::new,
+                PojoSet[]::new,
+                PojoSet::init);
+    }
+
     @Override
     public PojoSet get(Integer id) {
-        return fetchOneRowAsPojo(PojoSet::new, SQL_SET_SELECT_BY_ID, id);
+        return fetchOneRowAsPojoObject(SQL_SET_SELECT_BY_ID, id);
     }
 
     @Override
     public PojoSet[] getAll() {
-        return fetchRowsAsPojoArray(PojoSet::new, PojoSet[]::new, SQL_SET_SELECT_ALL);
+        return fetchRowsAsPojoArray(SQL_SET_SELECT_ALL);
     }
 
     @Override
@@ -21,7 +28,7 @@ public class DaoSetImpl extends DaoBackground implements DaoSet {
                 params[1] != null &&  //node_id
                 params[2] != null &&  //measure_id
                 params[3] != null ?   //singleton
-                fetchOneRowAsPojo(PojoSet::new, SQL_SET_INSERT, params[0], params[1], params[2], params[3], makerId) :
+                fetchOneRowAsPojoObject(SQL_SET_INSERT, params[0], params[1], params[2], params[3], makerId) :
                 null;
     }
 
@@ -32,7 +39,7 @@ public class DaoSetImpl extends DaoBackground implements DaoSet {
                 set.getNodeId() != null &&
                 set.getMeasureId() != null &&
                 set.getSingleton() != null &&
-                fetchOneRowAsPojoObject(set::init, SQL_SET_INSERT, set.getName(), set.getNodeId(), set.getMeasureId(), set.getSingleton(), makerId);
+                fetchOneRowAsPojoObject(set, SQL_SET_INSERT, set.getName(), set.getNodeId(), set.getMeasureId(), set.getSingleton(), makerId);
     }
 
     @Override

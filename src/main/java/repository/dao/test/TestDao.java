@@ -1,16 +1,14 @@
 package repository.dao.test;
 
 import org.apache.log4j.Logger;
-import pojo.PojoUser;
+import repository.pojo.PojoUser;
 import repository.dao.DaoUserImpl;
-
 import java.util.Arrays;
 
 public class TestDao {
     private static final Logger LOGGER = Logger.getLogger(TestDao.class);
 
     public static void main(String[] args) {
-
         PojoUser pojoUser = new DaoUserImpl().add(1, "userLogin", "userPassw", "userNick");
         LOGGER.debug(pojoUser == null ? "null" : pojoUser.toString());
 

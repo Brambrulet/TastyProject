@@ -1,6 +1,6 @@
-package repository.dao;
+package repository.dao.iface;
 
-import pojo.PojoSetLine;
+import repository.pojo.PojoSetLine;
 
 public interface DaoSetLine {
     PojoSetLine get(int id);

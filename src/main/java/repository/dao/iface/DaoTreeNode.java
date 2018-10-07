@@ -1,6 +1,6 @@
-package repository.dao.background;
+package repository.dao.iface;
 
-import pojo.PojoTreeNode;
+import repository.pojo.PojoTreeNode;
 
 public interface DaoTreeNode {
     PojoTreeNode get(String sql, Integer id);

@@ -1,17 +1,23 @@
 package repository.dao;
 
-import pojo.PojoAttribute;
+import repository.pojo.PojoAttribute;
 import repository.dao.background.DaoBackground;
+import repository.dao.iface.DaoAttribute;
 
-public class DaoAttributeImpl extends DaoBackground implements DaoAttribute {
+public class DaoAttributeImpl extends DaoBackground<PojoAttribute> implements DaoAttribute {
+    public DaoAttributeImpl() {
+        super(PojoAttribute::new,
+                PojoAttribute[]::new,
+                PojoAttribute::init);
+    }
     @Override
     public PojoAttribute get(Integer id) {
-        return fetchOneRowAsPojo(PojoAttribute::new, SQL_ATTRIBUTE_SELECT_BY_ID, id);
+        return fetchOneRowAsPojoObject(SQL_ATTRIBUTE_SELECT_BY_ID, id);
     }
 
     @Override
     public PojoAttribute[] getAll() {
-        return fetchRowsAsPojoArray(PojoAttribute::new, PojoAttribute[]::new, SQL_ATTRIBUTE_SELECT_ALL);
+        return fetchRowsAsPojoArray(SQL_ATTRIBUTE_SELECT_ALL);
     }
 
     @Override
@@ -19,7 +25,7 @@ public class DaoAttributeImpl extends DaoBackground implements DaoAttribute {
         return makerId > 0 && params.length == 2 &&
                 params[0] != null &&
                 params[1] != null ?
-                fetchOneRowAsPojo(PojoAttribute::new, SQL_ATTRIBUTE_INSERT, params[0], params[1], makerId) :
+                fetchOneRowAsPojoObject(SQL_ATTRIBUTE_INSERT, params[0], params[1], makerId) :
                 null;
     }
 

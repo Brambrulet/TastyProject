@@ -1,6 +1,6 @@
 package repository.connection_manager;
 
-import consts.Consts;
+import utils.consts.Consts;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
